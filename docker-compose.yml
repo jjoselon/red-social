@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: microservicio
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  persistencia:
+    build: ./microservice-persistencia
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@db:5432/microservicio"
+    networks:
+      - app_network
+    entrypoint: ["/app/entrypoint.sh"]      
+
+  autenticacion:
+    build: ./microservice-3-auth
+    depends_on:
+      - persistencia
+    ports:
+      - "3001:3001"
+    environment:
+      PERSISTENCIA_URL: "http://persistencia:3000"
+      JWT_SECRET: secret-key
+      PORT: 3001
+    networks:
+      - app_network
+    command: ["npm", "run", "dev"]
+
+  usuarios:
+    build: ./microservice-2-users
+    depends_on:
+      - persistencia
+    ports:
+      - "3002:3002"
+    environment:
+      PERSISTENCIA_URL: "http://persistencia:3000"
+      JWT_SECRET: secret-key
+      PORT: 3002
+    networks:
+      - app_network
+    command: ["npm", "run", "dev"]
+
+  publicaciones:
+    build: ./microservice-4-posts
+    depends_on:
+      - persistencia
+    ports:
+      - "3003:3003"
+    environment:
+      PERSISTENCIA_URL: "http://persistencia:3000"
+      JWT_SECRET: secret-key
+      PORT: 3003
+    networks:
+      - app_network
+    command: ["npm", "run", "dev"]
+
+  frontend:
+    build: ./microservice-1-frontend
+    depends_on:
+      - autenticacion
+      - usuarios
+      - publicaciones
+    ports:
+      - "80:80"
+    environment:
+      AUTH_URL: "http://localhost:3001"
+      AUTH_USERS: "http://localhost:3002"
+      AUTH_POSTS: "http://localhost:3003"
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge

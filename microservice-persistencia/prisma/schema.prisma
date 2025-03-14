@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:password@db:5432/microservicio"
+}
+
+model User {
+  id    Int    @id @default(autoincrement())
+  username String @unique
+  email String
+  age Int
+  city String
+  photoUrl String
+  posts Post[]
+}
+
+model Post {
+  id       Int    @id @default(autoincrement())
+  content  String
+  likes    Int    @default(0)
+  userId   Int
+  user     User   @relation(fields: [userId], references: [id])
+}
