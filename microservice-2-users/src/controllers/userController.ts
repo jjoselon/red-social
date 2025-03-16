@@ -10,7 +10,7 @@ export const getProfile = async (req: Request, res: Response) => {
     const response = await axios.get(`${PERSISTENCIA_URL}/users/${username}`);
     res.json({ message: "Response from Persistencia", data: response.data });
   } catch (error) {
-    console.error("Error fetching from Persistencia:", error);
+    //console.error("Error fetching from Persistencia:", error);
     res.status(500).json({ error: "Failed to fetch from Persistencia" });
   }
 };
