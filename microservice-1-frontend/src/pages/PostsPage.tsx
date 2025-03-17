@@ -15,8 +15,8 @@ function PostsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
-    if (!token) {
-      navigate("/");
+if (!token) {
+      navigate("/login");
     } else {
       fetchPosts();
     }

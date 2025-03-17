@@ -18,7 +18,7 @@ function ProfilePage() {
 
   useEffect(() => {
     if (!token) {
-      navigate('/');
+      navigate("/login");
     } else {
       fetchProfile();
     }
